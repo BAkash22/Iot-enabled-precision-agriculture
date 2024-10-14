@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Crop Prediction</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>IoT Crop Prediction</h1>
+    
+    <form id="sensorForm">
+        <label for="N">Nitrogen (N):</label>
+        <input type="number" id="N" name="N" required><br>
+
+        <label for="P">Phosphorous (P):</label>
+        <input type="number" id="P" name="P" required><br>
+
+        <label for="K">Potassium (K):</label>
+        <input type="number" id="K" name="K" required><br>
+
+        <label for="temperature">Temperature (°C):</label>
+        <input type="number" id="temperature" name="temperature" required><br>
+
+        <label for="humidity">Humidity (%):</label>
+        <input type="number" id="humidity" name="humidity" required><br>
+
+        <label for="ph">pH Level:</label>
+        <input type="number" id="ph" name="ph" required><br>
+
+        <label for="rainfall">Rainfall (mm):</label>
+        <input type="number" id="rainfall" name="rainfall" required><br>
+
+        <label for="season">Season:</label>
+        <select id="season" name="season" required>
+            <option value="Kharif">Kharif (June-October)</option>
+            <option value="Zaid">Zaid (March-June)</option>
+            <option value="Rabi">Rabi (October-March)</option>
+        </select><br>
+
+        <button type="submit">Predict Crop</button>
+    </form>
+
+    <h3>Predicted Crop: <span id="cropPrediction"></span></h3>
+    <h3 id="historicalGrownText"></h3>
+
+    <script>
+        document.getElementById('sensorForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const formData = {
+                N: document.getElementById('N').value,
+                P: document.getElementById('P').value,
+                K: document.getElementById('K').value,
+                temperature: document.getElementById('temperature').value,
+                humidity: document.getElementById('humidity').value,
+                ph: document.getElementById('ph').value,
+                rainfall: document.getElementById('rainfall').value,
+                season: document.getElementById('season').value
+            };
+
+            fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('cropPrediction').textContent = data.predicted_crop;
+                document.getElementById('historicalGrownText').textContent = data.historical_grown_text;
+            });
+        });
+    </script>
+</body>
+</html>
