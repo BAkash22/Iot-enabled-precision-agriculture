@@ -11,25 +11,25 @@
     
     <form id="sensorForm">
         <label for="N">Nitrogen (N):</label>
-        <input type="number" id="N" name="N" required><br>
+        <input type="number" id="N" name="N" step="0.01" required><br>
 
         <label for="P">Phosphorous (P):</label>
-        <input type="number" id="P" name="P" required><br>
+        <input type="number" id="P" name="P" step="0.01" required><br>
 
         <label for="K">Potassium (K):</label>
-        <input type="number" id="K" name="K" required><br>
+        <input type="number" id="K" name="K" step="0.01" required><br>
 
         <label for="temperature">Temperature (°C):</label>
-        <input type="number" id="temperature" name="temperature" required><br>
+        <input type="number" id="temperature" name="temperature" step="0.01" required><br>
 
         <label for="humidity">Humidity (%):</label>
-        <input type="number" id="humidity" name="humidity" required><br>
+        <input type="number" id="humidity" name="humidity" step="0.01" required><br>
 
         <label for="ph">pH Level:</label>
-        <input type="number" id="ph" name="ph" required><br>
+        <input type="number" id="ph" name="ph" step="0.01" required><br>
 
         <label for="rainfall">Rainfall (mm):</label>
-        <input type="number" id="rainfall" name="rainfall" required><br>
+        <input type="number" id="rainfall" name="rainfall" step="0.01" required><br>
 
         <label for="season">Season:</label>
         <select id="season" name="season" required>
@@ -39,15 +39,39 @@
         </select><br>
 
         <button type="submit">Predict Crop</button>
+        <button type="button" id="simulateBtn">Simulate Sensor Data</button>
     </form>
 
     <h3>Predicted Crop: <span id="cropPrediction"></span></h3>
     <h3 id="historicalGrownText"></h3>
 
     <script>
+        // Function to simulate sensor data
+        function simulateSensorData() {
+            const randomN = (Math.random() * 100).toFixed(2);
+            const randomP = (Math.random() * 100).toFixed(2);
+            const randomK = (Math.random() * 100).toFixed(2);
+            const randomTemperature = (Math.random() * 40).toFixed(2);
+            const randomHumidity = (Math.random() * 100).toFixed(2);
+            const randomPh = (Math.random() * 14).toFixed(2);
+            const randomRainfall = (Math.random() * 300).toFixed(2);
+            //const seasons = ['Kharif', 'Zaid', 'Rabi'];
+            //const randomSeason = seasons[Math.floor(Math.random() * seasons.length)];
+
+            // Fill the form fields with random data
+            document.getElementById('N').value = randomN;
+            document.getElementById('P').value = randomP;
+            document.getElementById('K').value = randomK;
+            document.getElementById('temperature').value = randomTemperature;
+            document.getElementById('humidity').value = randomHumidity;
+            document.getElementById('ph').value = randomPh;
+            document.getElementById('rainfall').value = randomRainfall;
+            //document.getElementById('season').value = randomSeason;
+        }
+
         document.getElementById('sensorForm').addEventListener('submit', function(e) {
             e.preventDefault();
-
+    
             const formData = {
                 N: document.getElementById('N').value,
                 P: document.getElementById('P').value,
@@ -58,7 +82,8 @@
                 rainfall: document.getElementById('rainfall').value,
                 season: document.getElementById('season').value
             };
-
+    
+            // Make a POST request to the /predict endpoint
             fetch('/predict', {
                 method: 'POST',
                 headers: {
@@ -66,12 +91,27 @@
                 },
                 body: JSON.stringify(formData)
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
+                // Update the webpage with the predicted crop and historical information
                 document.getElementById('cropPrediction').textContent = data.predicted_crop;
                 document.getElementById('historicalGrownText').textContent = data.historical_grown_text;
+            })
+            .catch(error => {
+                console.error('Error during prediction:', error);
             });
         });
+
+        // Add event listener for the simulate button
+        document.getElementById('simulateBtn').addEventListener('click', function() {
+            simulateSensorData();
+        });
     </script>
+    
 </body>
 </html>
