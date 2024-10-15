@@ -28,7 +28,7 @@
         <label for="ph">pH Level:</label>
         <input type="number" id="ph" name="ph" step="0.01" required><br>
 
-        <label for="rainfall">Rainfall (mm):</label>
+        <label for="rainfall">Soil Moisture (%):</label>
         <input type="number" id="rainfall" name="rainfall" step="0.01" required><br>
 
         <label for="season">Season:</label>
@@ -46,6 +46,8 @@
     <h3 id="historicalGrownText"></h3>
 
     <script>
+        let lastSimulatedData = {}; // To store the last simulated data
+    
         // Function to simulate sensor data
         function simulateSensorData() {
             const randomN = (Math.random() * 100).toFixed(2);
@@ -54,10 +56,10 @@
             const randomTemperature = (Math.random() * 40).toFixed(2);
             const randomHumidity = (Math.random() * 100).toFixed(2);
             const randomPh = (Math.random() * 14).toFixed(2);
-            const randomRainfall = (Math.random() * 300).toFixed(2);
-            //const seasons = ['Kharif', 'Zaid', 'Rabi'];
-            //const randomSeason = seasons[Math.floor(Math.random() * seasons.length)];
-
+            const randomRainfall = (Math.random() * 100).toFixed(2);
+            const seasons = ['Kharif', 'Zaid', 'Rabi'];
+            const randomSeason = seasons[Math.floor(Math.random() * seasons.length)];
+    
             // Fill the form fields with random data
             document.getElementById('N').value = randomN;
             document.getElementById('P').value = randomP;
@@ -66,12 +68,39 @@
             document.getElementById('humidity').value = randomHumidity;
             document.getElementById('ph').value = randomPh;
             document.getElementById('rainfall').value = randomRainfall;
-            //document.getElementById('season').value = randomSeason;
+            document.getElementById('season').value = randomSeason;
+    
+            // Store the simulated data for later use
+            lastSimulatedData = {
+                N: randomN,
+                P: randomP,
+                K: randomK,
+                temperature: randomTemperature,
+                humidity: randomHumidity,
+                ph: randomPh,
+                rainfall: randomRainfall,
+                season: randomSeason
+            };
+    
+            // Send the same data to ThingSpeak
+            const THINGSPEAK_API_KEY = 'HDU7CQTSZKKP7CK2'; // Your ThingSpeak API key
+            const THINGSPEAK_URL = 'https://api.thingspeak.com/update';
+    
+            fetch(`${THINGSPEAK_URL}?api_key=${THINGSPEAK_API_KEY}&field1=${randomN}&field2=${randomP}&field3=${randomK}&field4=${randomTemperature}&field5=${randomHumidity}&field6=${randomPh}&field7=${randomRainfall}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Failed to send data to ThingSpeak, status: ${response.status}`);
+                }
+                console.log('Data sent to ThingSpeak successfully.');
+            })
+            .catch(error => {
+                console.error('Error sending data to ThingSpeak:', error);
+            });
         }
-
+    
         document.getElementById('sensorForm').addEventListener('submit', function(e) {
             e.preventDefault();
-    
+        
             const formData = {
                 N: document.getElementById('N').value,
                 P: document.getElementById('P').value,
@@ -82,7 +111,7 @@
                 rainfall: document.getElementById('rainfall').value,
                 season: document.getElementById('season').value
             };
-    
+        
             // Make a POST request to the /predict endpoint
             fetch('/predict', {
                 method: 'POST',
@@ -106,12 +135,13 @@
                 console.error('Error during prediction:', error);
             });
         });
-
+    
         // Add event listener for the simulate button
         document.getElementById('simulateBtn').addEventListener('click', function() {
             simulateSensorData();
         });
     </script>
+      
     
 </body>
 </html>
