@@ -2,13 +2,13 @@ import time
 import requests
 import random
 
-# Flask app URL for the /predict route
+
 FLASK_APP_URL = "http://127.0.0.1:5000/predict"
 
-# Your ThingSpeak Write API key (replace this with your actual ThingSpeak API key)
+
 THINGSPEAK_API_KEY = 'HDU7CQTSZKKP7CK2'
 
-# ThingSpeak URL for sending data
+
 THINGSPEAK_URL = 'https://api.thingspeak.com/update'
 
 def send_to_flask(sensor_data):
@@ -23,7 +23,7 @@ def send_to_flask(sensor_data):
     except Exception as e:
         print(f"Error connecting to Flask app: {e}")
 
-def send_to_thingspeak(sensor_data):
+def fetch_from_thingspeak(sensor_data):
     """Send the sensor data to ThingSpeak."""
     try:
         response = requests.get(THINGSPEAK_URL, params={
@@ -47,25 +47,24 @@ def send_to_thingspeak(sensor_data):
 def simulate_sensor_data():
     """Simulate sensor data and send it to the Flask app and ThingSpeak."""
     while True:
-        # Simulate random sensor values
+        
         sensor_data = {
-            'N': random.uniform(0, 100),  # Simulating Nitrogen levels
-            'P': random.uniform(0, 100),  # Simulating Phosphorus levels
-            'K': random.uniform(0, 100),  # Simulating Potassium levels
-            'temperature': random.uniform(15, 40),  # Simulating temperature in °C
-            'humidity': random.uniform(30, 90),  # Simulating humidity percentage
-            'ph': random.uniform(5.0, 9.0),  # Simulating soil pH levels
-            'rainfall': random.uniform(30, 90),  # Simulating rainfall in mm
+            'N': random.uniform(0, 100), 
+            'P': random.uniform(0, 100), 
+            'K': random.uniform(0, 100), 
+            'temperature': random.uniform(15, 40),  
+            'humidity': random.uniform(30, 90), 
+            'ph': random.uniform(5.0, 9.0),  
+            'rainfall': random.uniform(30, 90), 
         }
 
-        # Send data to Flask app
+    
         send_to_flask(sensor_data)
 
-        # Send data to ThingSpeak
-        send_to_thingspeak(sensor_data)
+        fetch_from_thingspeak(sensor_data)
 
-        # Wait for a few seconds before sending the next set of data
-        time.sleep(2)  # Adjust this delay as necessary
+       
+        time.sleep(2)  
 
 if __name__ == "__main__":
     simulate_sensor_data()
